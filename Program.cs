@@ -91,6 +91,11 @@ namespace Calculator
             var result = DoOperation(number, func);
             return result;
         }
+
+        public static void StatMet()
+        {
+            Console.WriteLine("ABOBA");
+        }
     }
 
 
@@ -108,6 +113,7 @@ namespace Calculator
             long DoubleNumber(long n) => 2 * n;
             calculator.LoadHistory();
             // calculator.ShowHistory();
+            Calculator.StatMet();
         }
     }
 }
