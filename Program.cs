@@ -13,14 +13,10 @@ namespace Calculator
 
     internal record History
     {
-        [JsonInclude]
-        public long Number1;
-        [JsonInclude]
-        public long Number2;
-        [JsonInclude]
-        public char Sign;
-        [JsonInclude]
-        public long Result;
+        [JsonInclude] public long Number1;
+        [JsonInclude] public long Number2;
+        [JsonInclude] public char Sign;
+        [JsonInclude] public long Result;
     }
 
     internal class Calculator(long number1, long number2) : ICalculator
@@ -61,14 +57,19 @@ namespace Calculator
 
         public async void ShowHistory()
         {
+            await using var fs = new FileStream("history.json", FileMode.Create);
+            await JsonSerializer.SerializeAsync(fs, history);
+            fs.Flush();
             for (int i = 0; i < history.Count; i++)
             {
                 Console.WriteLine(history[i]);
             }
+        }
 
-            await using var fs = new FileStream("history.json", FileMode.Create);
-            await JsonSerializer.SerializeAsync(fs, history);
-            fs.Flush();
+        public double Average()
+        {
+            var av = (from p in history where p.Result != 0 select p).Average(f => f.Result);
+            return av;
         }
     }
 
@@ -82,6 +83,7 @@ namespace Calculator
             Console.WriteLine(calculator.Sub());
             Console.WriteLine(calculator.Mult());
             Console.WriteLine(calculator.Div());
+            Console.WriteLine(calculator.Average());
             calculator.ShowHistory();
         }
     }
