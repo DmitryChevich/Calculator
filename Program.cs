@@ -84,6 +84,13 @@ namespace Calculator
                 }
             }
         }
+
+        public long CustomFunction(Func<long, long> func, long number)
+        {
+            long DoOperation(long n, Func<long, long> operation) => operation(n);
+            var result = DoOperation(number, func);
+            return result;
+        }
     }
 
 
@@ -97,6 +104,8 @@ namespace Calculator
             calculator.Mult();
             calculator.Div();
             // Console.WriteLine(calculator.Average());
+            Console.WriteLine(calculator.CustomFunction(DoubleNumber, 4));
+            long DoubleNumber(long n) => 2 * n;
             calculator.LoadHistory();
             // calculator.ShowHistory();
         }
