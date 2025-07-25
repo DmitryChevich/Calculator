@@ -10,7 +10,7 @@ namespace Calculator
         public long Div();
     }
 
-    internal ref struct History
+    internal record History
     {
         public long Number1;
         public long Number2;
@@ -20,65 +20,55 @@ namespace Calculator
 
     internal class Calculator(long number1, long number2) : ICalculator
     {
+        List<History> history = new List<History>();
+
         public long Sum()
         {
-            var history = new History
+            var historySum = new History
                 { Number1 = number1, Number2 = number2, Sign = '+', Result = number1 + number2 };
-            var historyString =
-                $"{history.Number1.ToString()} {history.Sign.ToString()} {history.Number2.ToString()} = {history.Result.ToString()}";
-            _ = ToFile(historyString);
+            history.Add(historySum);
             return number1 + number2;
         }
 
         public long Sub()
         {
-            var history = new History
+            var historySub = new History
                 { Number1 = number1, Number2 = number2, Sign = '-', Result = number1 - number2 };
-            var historyString =
-                $"{history.Number1.ToString()} {history.Sign.ToString()} {history.Number2.ToString()} = {history.Result.ToString()}";
-            _ = ToFile(historyString);
+            history.Add(historySub);
             return number1 - number2;
         }
 
         public long Mult()
         {
-            var history = new History
+            var historyMult = new History
                 { Number1 = number1, Number2 = number2, Sign = '*', Result = number1 * number2 };
-            var historyString =
-                $"{history.Number1.ToString()} {history.Sign.ToString()} {history.Number2.ToString()} = {history.Result.ToString()}";
-            _ = ToFile(historyString);
+            history.Add(historyMult);
             return number1 * number2;
         }
 
         public long Div()
         {
-            var history = new History
+            var historyDiv = new History
                 { Number1 = number1, Number2 = number2, Sign = '/', Result = number1 / number2 };
-            var historyString =
-                $"{history.Number1.ToString()} {history.Sign.ToString()} {history.Number2.ToString()} = {history.Result.ToString()}";
-
-            _ = ToFile(historyString);
+            history.Add(historyDiv);
             return number1 / number2;
         }
 
-        private static async Task ToFile(string historyString)
+        public async void ShowHistory()
         {
-            var historyJson = JsonSerializer.Serialize(historyString);
-            await using var fs = new FileStream("history.json", FileMode.OpenOrCreate);
-            await JsonSerializer.SerializeAsync(fs, historyJson);
-        }
+            for (int i = 0; i < history.Count; i++)
+            {
+                Console.WriteLine(history[i]);
+            }
 
-
-        public static async Task ShowHistory()
-        {
-            await using var fs = new FileStream("history.json", FileMode.OpenOrCreate);
-            var historyJsonDes = await JsonSerializer.DeserializeAsync<string>(fs);
-            Console.WriteLine(historyJsonDes);
+            await using var fs = new FileStream("history.json", FileMode.Create);
+            await JsonSerializer.SerializeAsync(fs, history);
+            fs.Flush();
         }
     }
 
 
-    internal abstract class Program
+    internal class Program
     {
         public static void Main()
         {
@@ -87,7 +77,7 @@ namespace Calculator
             Console.WriteLine(calculator.Sub());
             Console.WriteLine(calculator.Mult());
             Console.WriteLine(calculator.Div());
-            _ = Calculator.ShowHistory();
+            calculator.ShowHistory();
         }
     }
 }
