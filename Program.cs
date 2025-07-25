@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Calculator
 {
@@ -12,9 +13,13 @@ namespace Calculator
 
     internal record History
     {
+        [JsonInclude]
         public long Number1;
+        [JsonInclude]
         public long Number2;
+        [JsonInclude]
         public char Sign;
+        [JsonInclude]
         public long Result;
     }
 
