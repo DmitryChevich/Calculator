@@ -20,11 +20,39 @@ namespace Calculator
 
     public class Calculator<T> where T : INumber<T>
     {
+        public record History
+        {
+            public string Func = "";
+            public T[] HistoryArgs = [];
+            public T Result = T.Zero;
+        }
+
+        static List<History> _history = new List<History>();
+
+        private void WriteHistory(History history)
+        {
+            Console.WriteLine($"Name:\n " + history.Func + $"\nArgs");
+            foreach (var arg in history.HistoryArgs)
+            {
+                Console.WriteLine($" " + arg);
+            }
+
+            Console.WriteLine($"Result:\n {history.Result}");
+        }
+
         public Operation<T> SumOperation { get; set; } = new Operation<T>(args =>
         {
             T result = T.Zero;
             foreach (var arg in args)
                 result += arg;
+
+            var historySum = new History
+            {
+                Func = "Sum", HistoryArgs = args, Result = result
+            };
+
+            _history.Add(historySum);
+
             return result;
         });
 
@@ -39,12 +67,38 @@ namespace Calculator
             T result = args[0];
             for (int i = 1; i < args.Length; i++)
                 result -= args[i];
+
+            var historySub = new History
+            {
+                Func = "Substract", HistoryArgs = args, Result = result
+            };
+
+            _history.Add(historySub);
+
             return result;
         });
 
         public T Custom(Operation<T> operation, params T[] args)
         {
-            return operation.Execute(args);
+            var result = operation.Execute(args);
+
+
+            var historyCustom = new History
+            {
+                Func = $"Custom {operation}", HistoryArgs = args, Result = result
+            };
+            _history.Add(historyCustom);
+
+            return result;
+        }
+
+        public void ShowHistory()
+        {
+            for (int i = 0; i < _history.Count; i++)
+            {
+                Console.WriteLine();
+                WriteHistory(_history[i]);
+            }
         }
     }
 
@@ -59,10 +113,8 @@ namespace Calculator
                 var subRes = calc.SubtractOperation.Execute([1, 2, 3, 75]);
                 var custom = new Operation<double>(args => args[0] * args[1] * args[2]);
                 var customRes = calc.Custom(custom, 4, 5, 2);
-                Console.WriteLine(sumRes);
-                Console.WriteLine(subRes);
-                Console.WriteLine(customRes);
-                Console.WriteLine("\n\nIt just works!\n\n");
+                calc.ShowHistory();
+                Console.WriteLine("\nIt just works!\n");
             }
         }
     }
