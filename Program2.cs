@@ -2,6 +2,13 @@
 
 namespace Calculator
 {
+    public interface ICalculator<T> where T : INumber<T>
+    {
+        public Operation<T> SumOperation { get; }
+        public Operation<T> SubtractOperation { get; }
+        public void ShowHistory();
+    }
+
     public class Operation<T> where T : INumber<T>
     {
         private Func<T[], T> _func;
@@ -11,6 +18,7 @@ namespace Calculator
             _func = func;
         }
 
+
         public T Execute(T[] args)
         {
             return _func(args);
@@ -18,7 +26,7 @@ namespace Calculator
     }
 
 
-    public class Calculator<T> where T : INumber<T>
+    public class Calculator<T> : ICalculator<T> where T : INumber<T>
     {
         public record History
         {
@@ -70,7 +78,7 @@ namespace Calculator
 
             var historySub = new History
             {
-                Func = "Substract", HistoryArgs = args, Result = result
+                Func = "Subtract", HistoryArgs = args, Result = result
             };
 
             _history.Add(historySub);
@@ -104,18 +112,15 @@ namespace Calculator
 
     public class Program2
     {
-        class Program
+        public static void Main()
         {
-            public static void Main()
-            {
-                Calculator<double> calc = new Calculator<double>();
-                var sumRes = calc.SumOperation.Execute([1, 2, 3, 75]);
-                var subRes = calc.SubtractOperation.Execute([1, 2, 3, 75]);
-                var custom = new Operation<double>(args => args[0] * args[1] * args[2]);
-                var customRes = calc.Custom(custom, 4, 5, 2);
-                calc.ShowHistory();
-                Console.WriteLine("\nIt just works!\n");
-            }
+            Calculator<double> calc = new Calculator<double>();
+            var sumRes = calc.SumOperation.Execute([1, 2, 3, 75]);
+            var subRes = calc.SubtractOperation.Execute([1, 2, 3, 75]);
+            var custom = new Operation<double>(args => args[0] * args[1] * args[2]);
+            var customRes = calc.Custom(custom, 4, 5, 2);
+            calc.ShowHistory();
+            Console.WriteLine("\nIt just works!\n");
         }
     }
 }
