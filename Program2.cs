@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Calculator
 {
@@ -30,10 +32,12 @@ namespace Calculator
     {
         public record History
         {
-            public string Func = "";
-            public T[] HistoryArgs = [];
-            public T Result = T.Zero;
+            [JsonInclude] public string Func = "";
+            [JsonInclude] public T[] HistoryArgs = [];
+            [JsonInclude] public T Result = T.Zero;
         }
+        
+        List<History>? _loadedHistory;
 
         static List<History> _history = new List<History>();
 
@@ -108,12 +112,36 @@ namespace Calculator
                 WriteHistory(_history[i]);
             }
         }
-        
+
         public T Max()
-         {
-             var av = (from p in _history where p.Result != T.Zero select p).OrderByDescending(x => x.Result).First().Result;
-             return av;
-         }
+        {
+            var av = (from p in _history where p.Result != T.Zero select p).OrderByDescending(x => x.Result).First()
+                .Result;
+            return av;
+        }
+
+        public void WriteToFile()
+        {
+            using (FileStream fs = new FileStream("history.json", FileMode.OpenOrCreate))
+            {
+                JsonSerializer.Serialize(fs, _history);
+                Console.WriteLine("Data has been saved to file");
+            }
+        }
+
+        public void LoadHistory()
+        {
+            using var fs = new FileStream("history.json", FileMode.Open);
+            _loadedHistory = JsonSerializer.Deserialize<List<History>>(fs);
+            if (_loadedHistory != null)
+            {
+                Console.WriteLine("Data has been loaded from file");
+                for (var i = 0; i < _loadedHistory.Count; i++)
+                {
+                    WriteHistory(_loadedHistory[i]);
+                }
+            }
+        }
     }
 
     public class Program2
@@ -128,6 +156,8 @@ namespace Calculator
             calc.ShowHistory();
             var max = calc.Max();
             Console.WriteLine($"Max:\n {max}");
+            calc.WriteToFile();
+            calc.LoadHistory();
             Console.WriteLine("\nIt just works!\n");
         }
     }
