@@ -108,6 +108,12 @@ namespace Calculator
                 WriteHistory(_history[i]);
             }
         }
+        
+        public T Max()
+         {
+             var av = (from p in _history where p.Result != T.Zero select p).OrderByDescending(x => x.Result).First().Result;
+             return av;
+         }
     }
 
     public class Program2
@@ -120,6 +126,8 @@ namespace Calculator
             var custom = new Operation<double>(args => args[0] * args[1] * args[2]);
             var customRes = calc.Custom(custom, 4, 5, 2);
             calc.ShowHistory();
+            var max = calc.Max();
+            Console.WriteLine($"Max:\n {max}");
             Console.WriteLine("\nIt just works!\n");
         }
     }
